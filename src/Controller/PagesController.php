@@ -15,8 +15,10 @@
 namespace App\Controller;
 
 use Cake\Core\Configure;
+use Cake\Event\Event;
 use Cake\Http\Exception\ForbiddenException;
 use Cake\Http\Exception\NotFoundException;
+use Cake\Http\Response;
 use Cake\View\Exception\MissingTemplateException;
 
 /**
@@ -28,6 +30,18 @@ use Cake\View\Exception\MissingTemplateException;
  */
 class PagesController extends AppController
 {
+    /**
+     * The Beforefilter method to allow unauthenticated access
+     *
+     * @param  Event $event An event
+     * @return Response|null The Response
+     */
+    public function beforeFilter(Event $event)
+    {
+        $this->Authentication->allowUnauthenticated(['display']);
+
+        return parent::beforeFilter($event);
+    }
 
     /**
      * Displays a view

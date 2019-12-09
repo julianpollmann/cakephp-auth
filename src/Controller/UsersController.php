@@ -2,6 +2,8 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
+use Cake\Event\Event;
+use Cake\Http\Response;
 
 /**
  * Users Controller
@@ -12,6 +14,19 @@ use App\Controller\AppController;
  */
 class UsersController extends AppController
 {
+    /**
+     * The Beforefilter method to allow unauthenticated access
+     *
+     * @param  Event $event An event
+     * @return Response|null The Response
+     */
+    public function beforeFilter(Event $event)
+    {
+        $this->Authentication->allowUnauthenticated(['login', 'logout', 'register']);
+
+        return parent::beforeFilter($event);
+    }
+
     /**
      * Index method
      *
@@ -102,5 +117,62 @@ class UsersController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+    /**
+     * Registers a user
+     *
+     * @return Response|null Redirect after success
+     */
+    public function register()
+    {
+        $user = $this->Users->newEntity();
+
+        if ($this->request->is('post')) {
+            $user = $this->Users->patchEntity($user, $this->request->getData());
+
+            if ($this->Users->save($user)) {
+                $this->Flash->success(__('Your registration was successful.'));
+
+                // Set user identity
+                $this->Authentication->setIdentity($user);
+
+                return $this->redirect('/');
+            }
+
+            $this->Flash->error(__('Your registration failed.'));
+        }
+
+        $this->set(compact('user'));
+    }
+
+    /**
+     * Logs a user in.
+     *
+     * @return Response|null On success redirect, otherwise null and errormessage.
+     */
+    public function login()
+    {
+        $result = $this->Authentication->getResult();
+
+        // If the user is logged in send them away.
+        if ($result->isValid()) {
+            $this->Flash->success(__('You are logged in.'));
+
+            $target = $this->Authentication->getLoginRedirect() ?? '/users';
+            return $this->redirect($target);
+        }
+    }
+
+    /**
+     * Logs a user out.
+     *
+     * @return Response|null Redirect after logout.
+     */
+    public function logout()
+    {
+        $this->Flash->success(__('You have been logged out.'));
+
+        return $this->redirect($this->Authentication->logout());
     }
 }

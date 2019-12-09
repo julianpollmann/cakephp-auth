@@ -24,6 +24,8 @@ use Cake\Event\Event;
  * will inherit them.
  *
  * @link https://book.cakephp.org/3.0/en/controllers.html#the-app-controller
+ * @property \Authentication\Controller\Component\AuthenticationComponent $Authentication
+ *
  */
 class AppController extends Controller
 {
@@ -45,6 +47,7 @@ class AppController extends Controller
             'enableBeforeRedirect' => false,
         ]);
         $this->loadComponent('Flash');
+        $this->loadComponent('Authentication.Authentication', ['logoutRedirect' => '/']);
 
         /*
          * Enable the following component for recommended CakePHP security settings.
